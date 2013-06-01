@@ -1,0 +1,56 @@
+<languageVersion : 1.0;>
+
+kernel Skeleton
+<   namespace : "Your Namespace";
+    vendor : "Your Vendor";
+    version : 1;
+    description : "your description";
+>
+{
+    input image4 src;
+    output pixel4 dst;
+
+    void
+    evaluatePixel()
+    {
+        float one = 1.0;
+        float2 c = outCoord();
+        dst = sampleNearest(src,c);
+        c.x -= one;
+        float3 p = sampleNearest( src, c ).rgb;
+        float m = p.r * 256.0 * 256.0 + p.g * 256.0 * 256.0 + p.b * 256.0;
+        float mi = m;
+        c.y -= one;
+        p = sampleNearest( src, c ).rgb;
+        m = max ( m, p.r * 256.0 * 256.0 + p.g * 256.0 * 256.0 + p.b * 256.0 );
+        mi = min( mi, m );
+        c.x += one;
+        p = sampleNearest( src, c ).rgb;
+        m = max ( m, p.r * 256.0 * 256.0 + p.g * 256.0 * 256.0 + p.b * 256.0 );
+        mi = min( mi, m );
+        c.x += one;
+        p = sampleNearest( src, c ).rgb;
+        m = max ( m, p.r * 256.0 * 256.0 + p.g * 256.0 * 256.0 + p.b * 256.0 );
+        mi = min( mi, m );
+        c.y += one;
+        p = sampleNearest( src, c ).rgb;
+        m = max ( m, p.r * 256.0 * 256.0 + p.g * 256.0 * 256.0 + p.b * 256.0 );
+        mi = min( mi, m );
+        c.y += one;
+        p = sampleNearest( src, c ).rgb;
+        m = max ( m, p.r * 256.0 * 256.0 + p.g * 256.0 * 256.0 + p.b * 256.0 );
+        mi = min( mi, m );
+        c.x -= one;
+        p = sampleNearest( src, c ).rgb;
+        m = max (m, p.r * 256.0 * 256.0 + p.g * 256.0 * 256.0 + p.b * 256.0 );
+        mi = min( mi, m );
+        c.x -= one;
+        p = sampleNearest( src, c ).rgb;
+        m = max ( m, p.r * 256.0 * 256.0 + p.g * 256.0 * 256.0 + p.b * 256.0 );
+        mi = min( mi, m );
+        
+        dst.rgb = ( m > mi && m <= dst.r * 256.0 * 256.0 + dst.g * 256.0 * 256.0 + dst.b * 256.0 ? float3(1.0,1.0,1.0) : float3(0.0,0.0,0.0) );
+        
+            
+    }
+}

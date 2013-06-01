@@ -1,0 +1,36 @@
+<languageVersion : 1.0;>
+
+kernel CartesianToPolar
+<   namespace : "com.quasimondo";
+    vendor : "Mario Klingemann";
+    version : 1;
+    description : "Cartesian to Polar Mapper";
+>
+{
+    input image4 src;
+    output pixel4 dst;
+    
+    parameter float2 dimensions
+    <
+        minValue: float2(1.0,1.0);
+        maxValue: float2(2000.0,2000.0);
+        defaultValue: float2(603.0,273.0);
+    >;
+    
+    parameter float angleFactor
+    <
+        minValue: 0.0;
+        maxValue: 2.0;
+        defaultValue: 1.0;
+    >;
+
+    void
+    evaluatePixel()
+    {
+        
+        float angle = outCoord().x / dimensions.x  * 6.28318531 * angleFactor + ( 6.28318531 - 6.28318531 * angleFactor ) * 0.5;
+        float radius = outCoord().y / dimensions.y * length( max( dimensions * 0.5, dimensions * 0.5 ) );
+        dst = sampleLinear(src,float2( dimensions.x * 0.5 + cos( angle ) * radius, dimensions.y * 0.5 + sin( angle ) * radius ));
+        
+    }
+}

@@ -1,0 +1,51 @@
+<languageVersion : 1.0;>
+
+kernel ReversePolarProjection
+<   namespace : "com.quasimondo";
+    vendor : "Mario Klingemann";
+    version : 1;
+>
+{
+    input image4 src;
+    output pixel4 dst;
+
+    parameter float2 center
+    <
+        minValue: float2( 0.0,0.0);
+        maxValue: float2( 2000.0,2000.0);
+        defaultValue: float2( 440.0,340.0);
+    >;
+    
+    parameter float stripWidth
+    <
+        minValue: 0.0;
+        maxValue: 2000.0;
+        defaultValue: 1347.0;
+    >;
+    
+    parameter float stripHeight
+    <
+        minValue: 0.0;
+        maxValue: 2000.0;
+        defaultValue: 200.0;
+    >;
+    
+     parameter float radius
+    <
+        minValue: 0.0;
+        maxValue: 2000.0;
+        defaultValue: 360.0;
+    >;
+    
+    const float PI = 3.14159265;
+
+
+    void
+    evaluatePixel()
+    {
+        float2 c = outCoord();
+        float angle = (( radius - stripHeight * 2.0 * PI ) / stripWidth ) * c.x / stripWidth * 2.0 * PI;
+        dst = sampleLinear( src, float2( center.x + cos( angle ) * ( radius - c.y ), 
+                                         center.y + sin( angle ) * ( radius - c.y )));
+    }
+}

@@ -1,0 +1,48 @@
+<languageVersion : 1.0;>
+
+kernel HSL2RGB
+<   namespace : "com.quasimondo";
+    vendor : "Mario Klingemann";
+    version : 1;
+>
+{
+    input image4 src;
+    output pixel4 dst;
+
+    void
+    evaluatePixel()
+    {
+        dst = sampleNearest(src,outCoord());
+        
+       
+        float v = mix(  dst.b * (1.0 + dst.g),dst.b + dst.g - dst.b * dst.g, step(dst.b,0.5  ) );
+        float m = dst.b + dst.b - v;
+        float sv = ( v - m ) / v;
+
+        dst.r *= 5.999999;
+
+        float sextant = mod(floor(dst.r),6.0);
+        float vsf = v * sv * (dst.r - sextant);
+        float mid1 = m + vsf;
+        float mid2 = v - vsf;
+       
+        float sx0 = 1.0 - abs( sign( sextant ) ) ;
+        float sx1 = (1.0 - abs( sign( sextant - 1.0 )));
+        float sx2 = (1.0 - abs( sign( sextant - 2.0 )));
+        float sx3 = (1.0 - abs( sign( sextant - 3.0 )));
+        float sx4 = (1.0 - abs( sign( sextant - 4.0 ))); 
+        float sx5 = (1.0 - abs( sign( sextant - 5.0 ))); 
+        
+        dst.rgb = sx0 * float3( v, mid1, m ) + 
+                  sx1 * float3( mid2, v, m  )+ 
+                  sx2 * float3( m, v, mid1 ) + 
+                  sx3 * float3( m, mid2, v ) +          
+                  sx4 * float3( mid1, m, v ) + 
+                  sx5 * float3( v, m, mid2 ); 
+       
+       
+       
+       
+       
+       }
+}

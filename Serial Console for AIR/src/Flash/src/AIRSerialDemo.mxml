@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx"
+					   applicationComplete="run()"
+					   width="540"
+					   height="400"
+					    >
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			private var process:NativeProcess;
+			private var serialComm:NativeProcess;
+			
+			private var serialIn:IDataOutput;
+			private var serialOut:IDataInput;
+			
+			private var startupPhase:int;
+			private var pollTimer:Timer;
+			
+			private var connectionSpeeds:ArrayCollection = new ArrayCollection([1200, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 115200]);
+			
+			private function run():void
+			{
+				startupPhase = 0;
+				
+				
+				var serialCommInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo(); 
+				serialCommInfo.executable = File.applicationDirectory.resolvePath("SerialConsole.exe"); ; 
+				
+				serialComm = new NativeProcess(); 
+				serialComm.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, onSerialData ); 
+				
+				serialComm.addEventListener(Event.STANDARD_OUTPUT_CLOSE, onSerialOutClose); 
+				serialComm.addEventListener(IOErrorEvent.STANDARD_ERROR_IO_ERROR, onSerialError); 
+				serialComm.addEventListener(IOErrorEvent.STANDARD_INPUT_IO_ERROR, onSerialError); 
+				serialComm.addEventListener(IOErrorEvent.STANDARD_OUTPUT_IO_ERROR, onSerialError);
+				serialComm.start(serialCommInfo); 
+				
+				serialIn  = serialComm.standardInput; 
+				serialOut = serialComm.standardOutput; 
+				
+				pollTimer = new Timer(50);
+				pollTimer.addEventListener( TimerEvent.TIMER, poll );
+				
+			}
+			
+			private function onSerialData(event:ProgressEvent):void 
+			{ 
+				var data:String = serialOut.readUTFBytes(serialOut.bytesAvailable); 
+				if ( startupPhase == 2 )
+				{
+					debug.appendText(data);
+				} else if ( startupPhase == 0 )
+				{
+					var devices:Array = data.split("\n");
+					devices.shift();
+					devices.pop();
+					devices.pop();
+					devices.unshift("Select the Serial Device");
+					device_list.dataProvider = new ArrayCollection( devices );
+					device_list.selectedIndex = 0;
+					//debug.appendText(devices.toString());
+					
+					
+				} else if ( startupPhase == 1 )
+				{
+					if ( data.indexOf("Serial connection established") > -1 )
+					{
+						debug.appendText("Serial connection established\n");
+						startupPhase++;
+						send_btn.enabled = break_btn.enabled = true;
+						device_list.enabled = false;
+						speed_list.enabled = false;
+						pollTimer.start();
+					} else {
+						connect_btn.enabled = true;
+					}
+				}
+			}
+				
+			private function onSerialOutClose(event:Event):void 
+			{ 
+				pollTimer.stop();
+				speed_list.enabled = device_list.enabled =connect_btn.enabled = true;
+				send_btn.enabled = break_btn.enabled = false;
+				debug.appendText("Serial connection closed\n");
+			}
+			
+			private function onSerialError(event:IOErrorEvent):void 
+			{ 
+				var data:String = serialOut.readUTFBytes(serialOut.bytesAvailable); 
+				debug.appendText(data);
+				
+			}
+			
+			private function setConnectionSettings():void
+			{
+				connect_btn.enabled = false;
+				serialIn.writeUTFBytes( (device_list.selectedIndex-1)+"\n"+speed_list.selectedItem.toString()+"\n");
+				startupPhase++;
+			}
+			
+			private function checkEnableConnect():void
+			{
+				connect_btn.enabled = ( device_list.selectedIndex > 0 );
+			}
+			
+			private function poll( event:TimerEvent ):void
+			{
+				serialIn.writeUTFBytes("g\n");	
+			}
+			
+			private function send():void
+			{
+				serialIn.writeUTFBytes("s\n"+input.text+"\n");
+				input.text = "";
+			}
+			
+			private function closeConnection():void
+			{
+				serialIn.writeUTFBytes("x\n");	
+				
+			}
+		]]>
+	</fx:Script>
+	<s:Group width="100%" height="100%">
+		<s:layout>
+			<s:VerticalLayout />
+		</s:layout>
+		<s:Group width="100%">
+			<s:layout>
+				<s:HorizontalLayout />
+			</s:layout>
+			<s:ComboBox id="device_list" width="250" change="checkEnableConnect()"/>
+			<s:ComboBox id="speed_list" width="80" dataProvider="{connectionSpeeds}" selectedIndex="3"/>
+			<s:Button id="connect_btn" label="Connect" enabled="false" click="setConnectionSettings()"/>
+			<s:Button id="break_btn" enabled="false" label="Close Connection" click="closeConnection()"/>
+		</s:Group>
+		<s:Group width="100%">
+			<s:layout>
+				<s:HorizontalLayout />
+			</s:layout>
+			<s:TextInput id="input" width="453" borderVisible="true" />
+			<s:Button id="send_btn" label="Send Data" enabled="false" click="send()"/>
+		</s:Group>
+		<s:TextArea id="debug" width="538" height="100%" borderVisible="true">
+		</s:TextArea>
+	</s:Group>
+</s:WindowedApplication>

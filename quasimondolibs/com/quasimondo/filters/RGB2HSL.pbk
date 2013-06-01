@@ -1,0 +1,45 @@
+<languageVersion : 1.0;>
+
+kernel RGB2HSL
+<   namespace : "com.quasimondo";
+    vendor : "Mario Klingemann";
+    version : 1;
+>
+{
+    input image4 src;
+    output pixel4 dst;
+
+    void
+    evaluatePixel()
+    {
+        dst = sampleNearest(src,outCoord());
+        
+        float3 hsl = float3(0.0);
+         
+        float v = max( dst.r, max( dst.g, dst.b ));
+        float m = min( dst.r, min( dst.g, dst.b ));
+
+        hsl.b = (m + v) * 0.5;
+        float vm = v - m;
+        hsl.g = vm;
+
+        hsl.g /= mix( v+m, 2.0-v-m, step( hsl.b,0.5) );
+        float3 rgb = (float3( v ) - dst.rgb) / ( vm + (1.0 - abs( sign(vm))));
+
+        float3 rgbvdiff = 1.0 - abs( sign(dst.rgb - v ) );
+        rgbvdiff.g *= (1.0 - rgbvdiff.r );
+        rgbvdiff.b *= (1.0 - rgbvdiff.r ) * (1.0 - rgbvdiff.g );
+        
+        float3 rgbmdiff = 1.0 - abs( sign( dst.rgb - m ));
+        rgbmdiff.b *= (1.0 - rgbmdiff.g );
+        rgbmdiff.r *= (1.0 - rgbmdiff.g ) * (1.0 - rgbmdiff.b );
+    
+        hsl.r =  ( rgbvdiff.r * mix( 1.0 - rgb.g, 5.0 + rgb.b, rgbmdiff.g ) +
+                   rgbvdiff.g * mix( 3.0 - rgb.b, 1.0 + rgb.r, rgbmdiff.b ) +
+                   rgbvdiff.b * mix( 5.0 - rgb.r, 3.0 + rgb.g, rgbmdiff.r )) / 6.0;
+        
+       dst.rgb = hsl;
+       
+        //dst.rb = float2(dst.g);
+     }
+}

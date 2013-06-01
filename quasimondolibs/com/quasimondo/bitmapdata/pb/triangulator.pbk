@@ -1,0 +1,55 @@
+<languageVersion : 1.0;>
+
+kernel Triangulator
+<   namespace : "Your Namespace";
+    vendor : "Your Vendor";
+    version : 1;
+    description : "your description";
+>
+{
+    input image4 src;
+    output pixel4 dst;
+
+    parameter float width
+    <
+        minValue: 1.0;
+        maxValue: 1000.0;
+        defaultValue: 639.0;
+    >;
+    
+    void
+    evaluatePixel()
+    {
+        float2 p0 = outCoord();
+        float3 c0 = sampleNearest(src,p0).rgb;
+        float2 p1 =  p0 + float2(1.0,1.0);
+        float3 c1 = sampleNearest(src,p1).rgb;
+        /*
+        if ( c1 == c0 )
+        {
+            p1 =  p0 - float2(1.0,1.0);
+            c1 = sampleNearest(src,p1).rgb;
+        }
+        */
+        float r0 = c0.b * 256.0 + c0.g * 256.0 * 256.0 + c0.r * 256.0 * 256.0 * 256.0;
+        float r1 = c1.b * 256.0 + c1.g * 256.0 * 256.0 + c1.r * 256.0 * 256.0 * 256.0;
+        float2 dp = p1 - p0;
+        float ds = dp.x * dp.x + dp.y * dp.y;
+        float d = sqrt(ds);
+        float a = (r0 - r1 + ds ) / (2.0 * d);
+        float2 p2 = p0 + dp * (a / d );
+        float h = sqrt( r0 - a * a );
+        float2 p3 = p2 - h * dp / d;
+        //if (sampleNearest(src,p3).rgb != float3(0.0,0.0,0.0) ) p3 = p2 - h * dp / d;
+       // dst = float4( 0.0, 0.5 + p3.x / 255.0, 0.5 + p3.y / 255.0, 1.0);
+        
+        float index = p3.y * width + p3.x;
+        float b = mod(index, 256.0 );
+        index = (index - b) / 256.0;
+        float g = mod(index, 256.0 );
+        index = (index - g) / 256.0;
+        float r = index;
+        dst = float4( r / 255.0, g / 255.0, b / 255.0 , 1.0 );
+        
+    }
+}

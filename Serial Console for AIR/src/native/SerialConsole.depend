@@ -1,0 +1,64 @@
+# depslib dependency file v1.0
+1289158999 source:c:\program files\codeblocks\of_prerelease_v0061_win_cb_fat\apps\serialConsole\src\main.cpp
+	"ofSerial.h"
+	"stdio.h"
+	"signal.h"
+	"windows.h"
+	"fcntl.h"
+
+1289157897 source:c:\program files\codeblocks\of_prerelease_v0061_win_cb_fat\apps\serialConsole\src\ofserial.cpp
+	"ofSerial.h"
+
+1289160958 c:\program files\codeblocks\of_prerelease_v0061_win_cb_fat\apps\serialconsole\src\ofserial.h
+	"ofConstants.h"
+	<termios.h>
+	<sys/ioctl.h>
+	<getopt.h>
+	<dirent.h>
+	<winbase.h>
+	<tchar.h>
+	<iostream>
+	<string.h>
+	<setupapi.h>
+	<regstr.h>
+	<winioctl.h>
+	<initguid.h>
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<fcntl.h>
+	<errno.h>
+	<ctype.h>
+
+1289161087 c:\program files\codeblocks\of_prerelease_v0061_win_cb_fat\apps\serialconsole\src\ofconstants.h
+	<TargetConditionals.h>
+	<windows.h>
+	<unistd.h>
+	"GLee.h"
+	<OpenGL/glu.h>
+	<ApplicationServices/ApplicationServices.h>
+	<unistd.h>
+	"GLee.h"
+	<GL/glu.h>
+	<stdio.h>
+	<stdarg.h>
+	<math.h>
+	<time.h>
+	<stdlib.h>
+	<string.h>
+	<iostream>
+	<vector>
+	<string>
+	<sstream>
+	<iomanip>
+
+1289164647 source:c:\program files\codeblocks\of_prerelease_v0061_win_cb_fat\apps\serialconsole\src\ofserial.cpp
+	"ofSerial.h"
+
+1289165118 source:c:\program files\codeblocks\of_prerelease_v0061_win_cb_fat\apps\serialconsole\src\main.cpp
+	"ofSerial.h"
+	"stdio.h"
+	"signal.h"
+	"windows.h"
+	"fcntl.h"
+

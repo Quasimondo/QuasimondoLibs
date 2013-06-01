@@ -1,0 +1,48 @@
+<languageVersion : 1.0;>
+
+kernel LensCorrection
+<   namespace : "com.quasimondo";
+    vendor : "Mario Klingemann";
+    version : 1;
+>
+{
+//Based on C code and explanation by Paul Bourke
+//http://paulbourke.net/miscellaneous/lenscorrection/
+
+    input image4 src;
+    output pixel4 dst;
+
+    parameter float2 size
+    <
+        minValue: float2(0.0,0.0);
+        maxValue: float2(2000.0,2000.0);
+        defaultValue: float2(1000.0,667.0);
+    >;
+    
+    parameter float2 factor
+    <
+        minValue: float2(-0.2,-0.2);
+        maxValue: float2(0.2,0.2);
+        defaultValue: float2(0.0,0.0);
+    >;
+    
+    // the grid is just a helper if you want to manually straighten lines
+    // by default it is off, use grid.z for grid size, and grid.xy for offset
+    parameter float3 grid
+    <
+        minValue: float3(-100.0,-100.0,0.0);
+        maxValue: float3(100.0,100.0,100.0);
+        defaultValue: float3(0.0,0.0,0.0);
+    >;
+    
+    void
+    evaluatePixel()
+    {
+       float2 c = outCoord();
+       float2 xy = (2.0 * c - size) / size;
+       float r = xy.x*xy.x + xy.y*xy.y;
+       float2 ij = ((xy * ( 1.0 - factor * r )) + 1.0) * size / 2.0;
+       dst = sampleLinear(src, ij);
+       dst.rgb += float3( step( mod( c.x + grid.x,grid.z),1.0) * step( mod( c.y+grid.y,grid.z),1.0) );
+    }
+}

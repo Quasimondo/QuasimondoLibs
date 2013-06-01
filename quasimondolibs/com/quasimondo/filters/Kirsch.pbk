@@ -1,0 +1,85 @@
+<languageVersion : 1.0;>
+
+kernel Kirsch
+<   namespace : "com.quasimondo";
+    vendor : "Mario Klingemann";
+    version : 1;
+>
+{
+
+//Kirsch Edge Detection
+
+    input image4 src;
+    output pixel4 dst;
+    
+    parameter float threshold
+    <
+        minValue: 0.0;
+        maxValue: 1.0;
+        defaultValue: 0.0;
+    >;
+    
+    parameter float factor
+    <
+        minValue: 0.0;
+        maxValue: 10.0;
+        defaultValue: 1.0;
+    >;
+    
+    parameter float gamma
+    <
+        minValue: 0.0;
+        maxValue: 20.0;
+        defaultValue: 1.0;
+    >;
+    
+    parameter float invert
+    <
+        minValue: 0.0;
+        maxValue: 1.0;
+        defaultValue: 0.0;
+    >;
+    
+    const float sqrt2 = 1.41421356;
+    void
+    evaluatePixel()
+    {
+        float2 c = outCoord();
+        c.x -= 1.0;
+        float p01 = length( sampleNearest(src,c).rgb );
+        c.y -= 1.0;
+        float p00 = length( sampleNearest(src,c).rgb );
+        c.x += 1.0;
+        float p10 = length( sampleNearest(src,c).rgb );
+        c.x += 1.0;
+        float p20 = length( sampleNearest(src,c).rgb );
+        c.y += 1.0;
+        float p21 = length( sampleNearest(src,c).rgb );
+        c.y += 1.0;
+        float p22 = length( sampleNearest(src,c).rgb );
+        c.x -= 1.0;
+        float p12 = length( sampleNearest(src,c).rgb );
+        c.x -= 1.0;
+        float p02 = length( sampleNearest(src,c).rgb );
+        
+        float s0 = p00 + p10 + p20;
+        float s1 = p20 + p21 + p22;
+        float s2 = p02 + p12 + p22;
+        float s3 = p00 + p01 + p02;
+        
+        
+        float g1 = ( 5.0 * s0 - 3.0 * ( s2 + p01 + p21 )  );
+        float g2 = ( 5.0 * ( p00 + p10 + p01 ) - 3.0 * ( s1 + s2 - p22 ) );
+        float g3 = ( 5.0 * s3 - 3.0 * ( s1 + p10 + p12 ) );
+        float g4 = ( 5.0 * ( p01 + p02 + p12 ) - 3.0 * ( s0 + s1 - p20 ) );
+        float g5 = ( 5.0 * s2 - 3.0 * ( s0 + p01 + p21 ) );
+        float g6 = ( 5.0 * ( p12 + p22 + p21 ) - 3.0 * ( s0 + s3 - p00 ) );
+        float g7 = ( 5.0 * s1 - 3.0 * ( s3 + p10 + p12 ) );
+        float g8 = ( 5.0 * ( p10 + p12 + p21 ) - 3.0 * ( s2 + s3 - p02 ) );
+          
+        float v = pow(  max( g1,max(  g2, max( g3, max( g4, max( g5, max( g6, max( g7, g8 ))))))), gamma );
+        v *= (step( v, threshold ) - threshold) * factor;
+        v = mix( v, 1.0 - v, invert );
+        dst = float4( v, v, v, 1.0 );
+    }
+}

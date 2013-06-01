@@ -1,0 +1,38 @@
+ActionScript 3.0 data structures - 15 June 2009
+
+version : 0.2
+revision: 2
+
+added		ListIterator
+added		PQueueIterator
+added		IIterableAggregate
+added		IIterator
+
+revised		LinkedList
+			+ pop();
+			+ shift();
+			+ insertNodeAtIndex();
+			+ insertNode();
+			+ removeNodeAtIndex();
+			+ removeNode();
+			+ getNodeAtIndex();
+			+ createIterator();
+			+ reverse();
+			- get iterator();
+			
+revised		ListNode
+			+ insertAfter();
+			+ removeNext();
+			
+-------------------------------------------------------------------------------
+
+ActionScript 3.0 data structures - 12 June 2009
+
+version : 0.1
+revision: 1
+
+inital release.
+
++ Linked List
++ Graph
++ Priority Queue
